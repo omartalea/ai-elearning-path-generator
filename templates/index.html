@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI eLearning Assistant</title>
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById("prompt").value;
+            const loadingText = document.getElementById("loading");
+            const tagsList = document.getElementById("tags");
+            const pathSection = document.getElementById("path");
+
+            // Show loading
+            loadingText.style.display = "block";
+            tagsList.innerHTML = "";
+            pathSection.innerHTML = "";
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const result = await response.json();
+
+                // Show tags
+                if (result.tags && result.tags.length > 0) {
+                    result.tags.forEach(tag => {
+                        const li = document.createElement("li");
+                        li.textContent = tag;
+                        tagsList.appendChild(li);
+                    });
+                } else {
+                    const noTags = document.createElement("li");
+                    noTags.textContent = "No tags found.";
+                    tagsList.appendChild(noTags);
+                }
+
+                // Show learning path
+                if (result.path) {
+                    pathSection.textContent = result.path;
+                } else {
+                    pathSection.textContent = "No learning path found.";
+                }
+
+            } catch (error) {
+                pathSection.textContent = "An error occurred while generating the response.";
+            }
+
+            loadingText.style.display = "none";
+        }
+    </script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; background-color: #000; color: #fff;">
+    <div style="display: flex; align-items: center; justify-content: center; color: #fff;">
+        <h1>AI eLearning Assistant</h1>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        <textarea id="prompt" rows="4" cols="60" placeholder="Type your learning goal here..."
+            style="width: 100%; padding: 10px; font-size: 16px; background-color: #222; color: #fff; border: 1px solid #555; border-radius: 6px;"></textarea><br><br>
+
+        <button onclick="sendPrompt()" style="padding: 10px 20px; font-size: 16px; background-color: #ff6600; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+            Generate
+        </button>
+
+        <p id="loading" style="display: none; color: #fff; font-weight: bold; margin-top: 20px;">Processing... please wait.</p>
+
+        <h2 style="margin-top: 30px; border-bottom: 1px solid #444;">Tags:</h2>
+        <ul id="tags" style="list-style-type: disc; padding-left: 20px;"></ul>
+
+        <h2 style="margin-top: 30px; border-bottom: 1px solid #444;">Learning Path:</h2>
+        <p id="path" style="line-height: 1.6; white-space: pre-line;"></p>
+    </div>
+</body>
+</html>
